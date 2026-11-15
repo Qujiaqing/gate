@@ -454,48 +454,132 @@ def build_chains_text(data):
     return "\n".join(lines) + "\n"
 
 
-# edgetunnel 入口地址池: 客户端直连 Cloudflare 的优选 IP:端口 (循环分配给每个国家节点当入口)
-# 可通过环境变量 EDGE_HOSTS 覆盖 (逗号分隔)
-EDGE_HOSTS = [
-    h.strip()
-    for h in os.environ.get(
-        "EDGE_HOSTS",
-        "cf.468123.xyz:443,buyshoes.shop:443,networksolutions.com:443,cf.254301.xyz:443,www.whoer.net:443,www.mastervolt.com:443,singapore.com:443,mogas.com:443,www.postman.com:443,
-        esm.run:443,jojolsj.jojojing.top:443,digitalocean.com:443,informahealthcare.com:443,assets.bizclikmedia.net:443,www.visa.com.au:443,dev.graco.com:443,syncfusion.com:443,
-        elegantthemes.com:443,images.chesscomfiles.com:443,hsl.upstate.edu:443,www.sofi.com:443,www.itedev.com:443,rargb.to:443,vueframework.com:443,www.npmjs.com:443,dnew.cc:443,www.revechat.com:443,
-        noc.one:443,mvnrepository.com:443,www.postman.com:443,rargb.to:443,email.lg.com:443,www.pixelexperience.org:443,www.itedev.com:443,assets.bizclikmedia.net:443,www.whoer.net:443,cdnjs.com:443,
-        www.meteorelectrical.com:443,www.acces-maroc.ma:443,9mod.com:443,api2-ide.imgnxa.com:443,www.spacex.com:443,aimagazine.com:443,my.vultr.com:443,www.nomios.com:443,ikankeji.com:443,
-        moondroplab.com:443,www.visa.com.hk:443,japan.com:443,www.epicgames.com:443,cdnjs.loli.net:443,cfip.1323123.xyz:443,js.org:443,packtpub.com:443,99.co:443,www.government.is:443,
-        bizclikmedia.com:443,jojolsj.jojojing.top:443,www.ventusky.com:443,s.ee:443,dx.doi.org:443,themeisle.com:443,hentaiverse.org:443,dogechain.info:443,form.assaabloy.com:443,
-        www.mediafire.com:443,kaspa.stream:443,www.elysee.fr:443,singapore.com:443,oxylabs.io:443,redis.io:443,networksolutions.com:443,www.crazygames.fr:443,www.applevis.com:443,
-        uptimerobot.com:443,resources.biginterview.com:443,aqua-aria.company:443,api.uniapi.io:443,zabc.net:443,static.elfsight.com:443,vayyar.com:443,cf.drxian.dpdns.org:443,
-        fictiv.com:443,investor.apple.com:443,www.speedtest.net:443,support.communilink.net:443,www.6i5.com:443,esm.run:443,yong.m123.org:443,constitution.congress.gov:443,www.petronaftco.com:443,
-        cf.xreak.top:443,bitsight.com:443,staticdelivery.nexusmods.com:443,sellerlogic.com:443,cf.yj250.bond:443,sanctuarywealth.com:443,www.visa.com.sg:443,moodle.org:443,www.dbs.com.sg:443,
-        envato.com:443,unpkg.com:443,mail.murata.com:443,www.donaldjtrump.com:443,crinacle.com:443,www.mastervolt.com:443,www.roche.com:443,www.oopt.eu.cc:443,www.giannidelprete.it:443,
-        dynadot.com:443,cf.090227.xyz:443,kwiat.com:443,www.wto.org:443,markmonitor.com:443,go1.dematic.com:443,videodelivery.net:443,smapi.xystem138.com:443,ncc.gov.ng:443,hitcon.org:443,
-        time.is:443,versantstore.pearson.com:443,i.pixiv.nl:443,openai.com:443,db-ip.com:443,www.apnic.net:443,ali.nonull.pp.ua:443,worldvectorlogo.com:443,www.doiting.com:443,www.5h.com:443,
-        www.sofi.com:443,xiaoqi.de:443,cloudflare.tv:443,www.scayle.com:443,help.kolet.com:443,visa.com:443,fbi.gov:443,hlevakha.gov.ua:443,www.dwk.com:443,informahealthcare.com:443,
-        \www.akasantech.com:443,mskcc.org:443,duggal.com:443,c-power.com.cn:443,www.galgamex.net:443,mogas.com:443,ovpnspider.com:443,w3.org:443,codexradar.com:443,gateway.ipfsscan.io:443,
-        mfa.gov.ua:443,www.trump.com:443,buyshoes.shop:443,example.com:443,zen-browser.app:443,pubs.acs.org:443,registry.yarnpkg.com:443,53.fs1.hubspotusercontent-na1.net:443,
-        garuda-indonesia.com:443,stores.staples.com:443,saas.sin.fan:443,guide.for.edu.sg:443,www.shopify.com:443,flightradar24.com:443,newsroom.avalara.com:443,builtbybuffalo.com:443,
-        dango.co:443,kali.download:443,registry.npmjs.org:443,cf.468123.xyz:443,centerofthewest.org:443,www.broadcom.com:443,www.canadatype.com:443,www.redboxtools.com:443,cdn.2x.nz:443,
-        images.chesscomfiles.com:443,www.mfyx.cn:443,www.visa.com.au:443,uspto.gov:443,aftership.com:443,tinyurl.com:443,investorrelations.medtronic.com:443,aandd.co.jp:443,icook.hk:443,
-        www.deepl.com:443,debot.ai:443,www.sloomb.com:443,page.mercer.com:443,scalacube.com:443,cf.vvhan.com:443,funko.com:443,journeys.com:443,leawo.org:443,linkvertise.com:443,alternativeto.net:443,
-        sunkist.com:443,digitalocean.com:443,academy.7shifts.com:443,www.trumpinternationalrealty.com:443,cf.254301.xyz:443,wppaunz.com:443,www.moc.gov.tw:443,jquery.com:443,kniu.cc:443,
-        cf.777791.xyz:443,www.loc.gov:443,codeforces.com:443,www.eccu.edu:443,www.lbl.gov:443,www.ntu.edu.sg:443,www.gov.il:443,grass.io:443,dev.graco.com:443,s.bookcdn.com:443,store.ubisoft.com:443,
-        thebeat.gehealthcare.com:443,hzytjy.cn:443,prizepicks.com:443,jobsdb.com:443,www.zendesk.com:443,salaryexpert.com:443,www.dentoncounty.gov:443,nodejs.org:443,linear.app:443,
-        elegantthemes.com:443,egov.uscis.gov:443,spring.io:443,m.iyf.tv:443,www.hypixel.net:443,gitlab.com:443,store.ubi.com:443,rocketreach.co:443,academy.mastercard.com:443,syncfusion.com:443,
-        stonexbullion.com:443,hsl.upstate.edu:443,nist.gov:443,www.carousell.sg:443,rankmath.com:443,www.leics.police.uk:443,kickstarter.com:443,chrono24.com:443,www.sage.com:443,
-        www.whatismyip.com:443,www.jp.pima.gov:443,www.visa.com.tw:443,ahrefs.com:443,dianomi.com:443,login.rockwellautomation.com:443,www.vmware.com:443,a.pub.network:443,www.chess.com:443,
-        serviceshub.samsclub.com:443,zoominfo.com:443,clickhouse.com:443,coreweave.com:443,www.udacity.com:443,spirol.com:443,hostinger.com:443,sourceforge.net:443,encryptedsni.com:443,
-        development.ihg.com:443,pure.coupert.com:443,www.copilot.com:443,dash.domain.digitalplat.org:443,cdn.ddeed.de:443,img.dexbug.com:443,cf.nyanya.moe:443,api.producthunt.com:443,mail.zrf.me:443,
-        saas.072159.xyz:443,qoj.ac:443,mokeedev.com:443,absen.com:443,www.people.inc:443,cdn.7zz.cn:443,emos.best:443,www.trumpgolf.com:443,i.jpg.dog:443,hubspot.com:443,elron.ee:443,
-        cdns.doon.eu.org:443,cfplus.255520.xyz:443,www.maxcom.de:443,auto.dolby.dpdns.org:443,mail.notion.com:443,ping.pe:443,www2.rarbggo.to:443,xn--b6gac.eu.org:443,carpt.net:443,p.etime.vip:443,
-        www.ox.ac.uk:443,www.stayaka.com:443,www.bis.gov:443,www.trumpstruth.org:443,www.timbuktutravel.com:443,dexari.com:443,ooo.0o0.ooo:443,www.blibli.com:443,cdn.sketch.com:443,
-        vueframework.com:443,cf-ip-site.vov.moe:443,easylist.to:443,jellyfin.roddy.eu.cc:443,macked.app:443,www.cancilleria.gov.co:443,autz.org:443,api.gzcrtw.com:443,shen6011.pages.dev:443",
+# ---------------------------------------------------------------------------
+# edgetunnel 入口地址池（优选 IP:端口）
+# 数据源: 远程 txt（每行 ip:port#备注; 也兼容逗号分隔 / 纯 host:port）
+# 取数顺序: 环境变量 EDGE_HOSTS > 远程源(按顺序) > 本地缓存 > 内置兜底
+# ---------------------------------------------------------------------------
+EDGE_HOST_SOURCES = [
+    u.strip()
+    for u in os.environ.get(
+        "EDGE_HOST_SOURCES",
+        "https://bestcf.pages.dev/tiancheng/all.txt",
     ).split(",")
-    if h.strip()
+    if u.strip()
 ]
+EDGE_HOSTS_CACHE = os.environ.get(
+    "EDGE_HOSTS_CACHE", os.path.join(REPO_DIR, "edge_hosts_cache.txt")
+)
+EDGE_HOSTS_TIMEOUT = float(os.environ.get("EDGE_HOSTS_TIMEOUT", "20"))
+EDGE_HOSTS_MAX = int(os.environ.get("EDGE_HOSTS_MAX", "0"))   # 0 = 不限条数
+
+# 全部数据源都失败时的最后兜底 (保持极短, 避免又变成一坨硬编码)
+EDGE_HOSTS_FALLBACK = [
+    "saas.072159.xyz:443",
+    "hzytjy.cn:443",
+    "ali.nonull.pp.ua:443",
+    "auto.dolby.dpdns.org:443",
+    "cdn.cnno.de:443",
+    "saas.sin.fan:443",
+]
+
+_HOST_RE = re.compile(r"^[A-Za-z0-9](?:[A-Za-z0-9._-]*[A-Za-z0-9])?:\d{1,5}$")
+_edge_hosts_memo = None
+
+
+def _parse_edge_hosts(text):
+    """把任意格式的文本解析成 host:port 列表 (去重、保序、可截断)。"""
+    hosts, seen = [], set()
+    for raw in text.splitlines():
+        line = raw.split("#", 1)[0].strip()          # 去掉 # 后面的备注
+        if not line:
+            continue
+        for tok in re.split(r"[,;\s]+", line):
+            tok = tok.strip().strip("\"'").lstrip("\\").strip()   # 去掉引号/残留反斜杠
+            if not tok or not _HOST_RE.match(tok):
+                continue
+            key = tok.lower()
+            if key in seen:
+                continue
+            seen.add(key)
+            hosts.append(tok)
+            if EDGE_HOSTS_MAX and len(hosts) >= EDGE_HOSTS_MAX:
+                return hosts
+    return hosts
+
+
+def _read_edge_cache():
+    try:
+        with open(EDGE_HOSTS_CACHE, "r", encoding="utf-8") as f:
+            return _parse_edge_hosts(f.read())
+    except Exception:
+        return []
+
+
+def _write_edge_cache(hosts):
+    try:
+        with open(EDGE_HOSTS_CACHE, "w", encoding="utf-8", newline="\n") as f:
+            f.write("# 自动生成: 远程优选IP数据源的本地缓存 (网络故障时兜底)\n")
+            f.write("\n".join(hosts) + "\n")
+    except Exception:
+        pass
+
+
+def get_edge_hosts(session=None, prefer_cache=False):
+    """返回入口地址池。结果缓存在进程内, 重复调用不重复请求网络。"""
+    global _edge_hosts_memo
+    if _edge_hosts_memo is not None:
+        return _edge_hosts_memo
+
+    # 1) 环境变量优先
+    env = os.environ.get("EDGE_HOSTS", "").strip()
+    if env:
+        hosts = _parse_edge_hosts(env)
+        if hosts:
+            log("EDGE HOSTS", f"使用环境变量 EDGE_HOSTS: {len(hosts)} 个入口")
+            _edge_hosts_memo = hosts
+            return hosts
+
+    # 2) 本地缓存优先 (可选)
+    if prefer_cache:
+        cached = _read_edge_cache()
+        if cached:
+            log("EDGE HOSTS", f"使用本地缓存: {len(cached)} 个入口")
+            _edge_hosts_memo = cached
+            return cached
+
+    # 3) 远程数据源
+    for url in EDGE_HOST_SOURCES:
+        try:
+            r = (session or requests).get(
+                url,
+                timeout=EDGE_HOSTS_TIMEOUT,
+                headers={"User-Agent": "Mozilla/5.0 (compatible; gate-checker)"},
+            )
+            r.raise_for_status()
+            hosts = _parse_edge_hosts(r.text)
+            if hosts:
+                _write_edge_cache(hosts)
+                log("EDGE HOSTS", f"{url} -> {len(hosts)} 个入口")
+                _edge_hosts_memo = hosts
+                return hosts
+            log("EDGE HOSTS", f"{url} 未解析出有效条目, 尝试下一个源")
+        except Exception as exc:
+            log("EDGE HOSTS", f"{url} 获取失败: {type(exc).__name__}: {exc}")
+
+    # 4) 缓存兜底
+    cached = _read_edge_cache()
+    if cached:
+        log("EDGE HOSTS", f"远程全失败, 回退本地缓存: {len(cached)} 个入口")
+        _edge_hosts_memo = cached
+        return cached
+
+    # 5) 内置兜底
+    fallback = _parse_edge_hosts(",".join(EDGE_HOSTS_FALLBACK))
+    log("EDGE HOSTS", f"全部数据源失败, 使用内置兜底: {len(fallback)} 个入口")
+    _edge_hosts_memo = fallback
+    return fallback
+
 
 HOSTS_URL = os.environ.get("HOSTS_URL", "https://jerylihub.github.io/gate/hosts.txt")
 
@@ -504,15 +588,15 @@ def build_hosts_text(data):
     """生成可直接粘贴到 edgetunnel 后台「自定义优选IP」框的清单。
     每行 = 入口地址#名字$sstp://... ; 名字固定, 底下 SSTP 节点每 30 分钟自动换。"""
     countries = data["countries"]
-    # 入口: 默认用 7 个实测可用优选域名循环分配; 可用 HOSTS_ENTRY 覆盖(逗号分隔)
+    # 入口: 默认从远程数据源拉取(带缓存兜底); 可用 HOSTS_ENTRY 覆盖(逗号分隔)
     _entry = os.environ.get("HOSTS_ENTRY", "").strip()
-    edge = [e.strip() for e in _entry.split(",") if e.strip()] or EDGE_HOSTS or [f"{EDT_DOMAIN}:443"]
+    edge = [e.strip() for e in _entry.split(",") if e.strip()] or get_edge_hosts() or [f"{EDT_DOMAIN}:443"]
     lines = [
         "# edgetunnel「自定义优选IP」清单 (整段复制, 追加到后台现有内容后面)",
         f"# 自动更新: {data['generated_at']} (每 30 分钟重新检测)",
         f"# 固定地址: {HOSTS_URL}",
         "# 每行 = 入口地址#名字$sstp://vpn:vpn@节点:端口",
-        "# 入口用 7 个实测可用优选域名循环分配",
+        f"# 入口池来自远程数据源 ({len(edge)} 个), 逐个循环分配",
         "# 名字 = 国家-住宅/机房-编号, 直接区分住宅与机房",
         "# 名字固定; 只有 $sstp:// 后面的节点地址每 30 分钟自动更换",
         "# 账号密码固定 vpn:vpn ; 节点端口必须保留",
@@ -675,6 +759,10 @@ def write_outputs(data):
 # ---------------------------------------------------------------------------
 def main():
     session = requests.Session()
+
+    # 0) 入口地址池 (远程拉取, 失败自动降级; 提前跑一次, 让 CI 日志能看见)
+    edge_hosts = get_edge_hosts(session)
+    log("EDGE HOSTS", f"入口地址池: {len(edge_hosts)} 个 (示例: {', '.join(edge_hosts[:3])})")
 
     # 1) 数据源
     rows, source = fetch_vpngate()
